@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from urllib.parse import quote
 import mysql.connector
 from geopy.distance import geodesic
 from datetime import datetime, timedelta

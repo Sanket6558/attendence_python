@@ -2,3 +2,5 @@ Flask==2.1.2
 mysql-connector-python==8.0.29
 geopy==2.2.0
 gunicorn
+
+Werkzeug>=2.0
