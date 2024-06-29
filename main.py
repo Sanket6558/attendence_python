@@ -227,7 +227,3 @@ def check_location():
             conn.commit()
         
         return jsonify({'status': 'outside', 'message': 'Employee is outside the radius'})
-
-
-if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
