@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <link rel="manifest" href="static/manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='kredpool.png') }}" alt="Logo">
+        <h1>Employee Attendance System</h1>
+    </header>
+
+    <div class="container">
+        <!-- Initial view with two buttons -->
+        <div id="initial-buttons" class="section">
+            <button id="admin-button">Admin</button>
+            <button id="employee-button">Employee</button>
+        </div>
+
+        <!-- Admin registration section -->
+        <div id="register-section" class="section" style="display: none;">
+            <h2>Register New Employee</h2>
+            <form id="admin-register-form">
+                <label for="admin_password">Admin Password:</label>
+                <input type="password" id="admin_password" name="admin_password" required><br>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required><br>
+                <label for="emp_id_register">Employee ID:</label>
+                <input type="text" id="emp_id_register" name="emp_id" required><br>
+                <label for="access_code_register">Access Code:</label>
+                <input type="password" id="access_code_register" name="access_code" required><br>
+                <button type="submit">Register</button>
+            </form>
+            <div id="register-message" class="message"></div>
+        </div>
+
+        <!-- Employee login section -->
+        <div id="login-section" class="section" style="display: none;">
+            <h2>Employee Login</h2>
+            <form id="login-form">
+                <label for="emp_id">Employee ID:</label>
+                <input type="text" id="emp_id" name="emp_id" required><br>
+                <label for="access_code">Access Code:</label>
+                <input type="password" id="access_code" name="access_code" required><br>
+                <button type="submit">Login</button>
+            </form>
+            <div id="login-message" class="message"></div>
+        </div>
+
+        <!-- Attendance section -->
+        <div id="attendance-section" class="section" style="display: none;">
+            <h2>Mark Attendance</h2>
+            <form id="attendance-form">
+                <label for="emp_id_attendance">Employee ID:</label>
+                <input type="text" id="emp_id_attendance" name="emp_id" required><br>
+                <button type="button" id="mark-attendance">Mark Attendance</button>
+            </form>
+            <div id="attendance-message" class="message"></div>
+        </div>
+
+        <!-- Sign-out section -->
+        <div id="sign-out-section" class="section" style="display: none;">
+            <h2>Sign Out</h2>
+            <form id="sign-out-form">
+                <label for="emp_id_signout">Employee ID:</label>
+                <input type="text" id="emp_id_signout" name="emp_id" required><br>
+                <button type="button" id="sign-out">Sign Out</button>
+            </form>
+            <div id="sign-out-message" class="message"></div>
+        </div>
+
+        <!-- Time spent section -->
+        <div id="time-spent-section" class="section" style="display: none;">
+            <h2>Time Spent</h2>
+            <p id="time-spent"></p>
+        </div>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+
+</html>

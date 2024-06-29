@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/static/manifest.json">
+    <title>Attendance System</title>
+    <style>
+        /* Add your CSS styling here */
+    </style>
+</head>
+
+<body>
+    <div id="register-section">
+        <h2>Register</h2>
+        <form id="register-form">
+            <input type="text" id="name" name="name" placeholder="Name" required>
+            <input type="number" id="emp_id" name="emp_id" placeholder="Employee ID" required>
+            <input type="text" id="access_code" name="access_code" placeholder="Access Code" required>
+            <button type="submit">Register</button>
+        </form>
+        <div id="register-message"></div>
+    </div>
+
+    <div id="login-section">
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="number" id="emp_id" name="emp_id" placeholder="Employee ID" required>
+            <input type="text" id="access_code" name="access_code" placeholder="Access Code" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="login-message"></div>
+    </div>
+
+    <div id="attendance-section" style="display:none;">
+        <h2>Mark Attendance</h2>
+        <input type="hidden" id="emp_id_attendance" name="emp_id_attendance">
+        <button id="mark-attendance">Mark Attendance</button>
+        <div id="attendance-message"></div>
+
+        <div id="sign-out-section" style="display:none;">
+            <h2>Sign Out</h2>
+            <input type="hidden" id="emp_id_signout" name="emp_id_signout">
+            <button id="sign-out">Sign Out</button>
+            <div id="sign-out-message"></div>
+        </div>
+    </div>
+
+    <div id="time-spent-section" style="display:none;">
+        <h2>Time Spent</h2>
+        <div id="time-spent"></div>
+    </div>
+
+    <script>
+        let trackingInterval;
+
+        document.getElementById('login-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/login', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('login-message').textContent = data.message;
+                    if (data.status === 'success') {
+                        document.getElementById('register-section').style.display = 'none';
+                        document.getElementById('attendance-section').style.display = 'block';
+                        document.getElementById('emp_id_attendance').value = formData.get('emp_id');
+                    }
+                });
+        });
+
+        document.getElementById('register-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/register', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('register-message').textContent = data.message;
+                    if (data.status === 'success') {
+                        document.getElementById('register-section').style.display = 'none';
+                        document.getElementById('attendance-section').style.display = 'block';
+                        document.getElementById('emp_id_attendance').value = formData.get('emp_id');
+                    }
+                });
+        });
+
+        document.getElementById('mark-attendance').addEventListener('click', function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const location = position.coords.latitude + ',' + position.coords.longitude;
+                    const empId = document.getElementById('emp_id_attendance').value;
+                    const formData = new FormData();
+                    formData.append('emp_id', empId);
+                    formData.append('location', location);
+                    fetch('/mark_attendance', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('attendance-message').textContent = data.message;
+                            if (data.status === 'success') {
+                                document.getElementById('sign-out-section').style.display = 'block';
+                                document.getElementById('time-spent-section').style.display = 'none';
+
+                                // Start tracking employee's location continuously
+                                trackingInterval = setInterval(function () {
+                                    navigator.geolocation.getCurrentPosition(function (position) {
+                                        const currentLocation = position.coords.latitude + ',' + position.coords.longitude;
+                                        const updateFormData = new FormData();
+                                        updateFormData.append('emp_id', empId);
+                                        updateFormData.append('location', currentLocation);
+                                        fetch('/update_location', {
+                                            method: 'POST',
+                                            body: updateFormData
+                                        })
+                                            .then(response => response.json())
+                                            .then(updateData => {
+                                                console.log(updateData.message);
+                                            });
+                                    });
+                                }, 10000); // Update location every 10 seconds
+                            }
+                        });
+                });
+            } else {
+                document.getElementById('attendance-message').textContent = 'Geolocation is not supported by this browser.';
+            }
+        });
+
+        document.getElementById('sign-out').addEventListener('click', function () {
+            const empId = document.getElementById('emp_id_signout').value;
+            const formData = new FormData();
+            formData.append('emp_id', empId);
+            fetch('/sign_out', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('sign-out-message').textContent = data.message;
+                    if (data.status === 'success') {
+                        document.getElementById('sign-out-section').style.display = 'none';
+                        document.getElementById('time-spent-section').style.display = 'block';
+                        document.getElementById('time-spent').textContent = 'Time spent: ' + data.time_spent;
+
+                        // Stop tracking location
+                        clearInterval(trackingInterval);
+                    }
+                });
+        });
+    </script>
+</body>
+
+</html>
